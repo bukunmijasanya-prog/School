@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Dashboard - Early Writing Scanner</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-cream: #FDF8F3;
+            --bg-white: #FFFFFF;
+            --primary: #E85D4C;
+            --primary-light: #FDEAE8;
+            --secondary: #4A90A4;
+            --secondary-light: #E8F4F8;
+            --accent-green: #6BBF59;
+            --accent-yellow: #F5C842;
+            --text-dark: #2D3748;
+            --text-medium: #5A6578;
+            --text-light: #8896AB;
+            --border: #E2E8F0;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: var(--bg-cream);
+            color: var(--text-dark);
+            min-height: 100vh;
+        }
+
+        .header {
+            background: var(--bg-white);
+            padding: 1rem 2rem;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-weight: 800;
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--bg-white);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 800;
+        }
+
+        .stat-label {
+            color: var(--text-medium);
+            font-size: 0.9rem;
+        }
+
+        .panel {
+            background: var(--bg-white);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+
+        .panel-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .panel-title {
+            font-weight: 700;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .panel-body {
+            padding: 1.5rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius-md);
+            font-family: inherit;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #D14A3A;
+        }
+
+        .btn-secondary {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .btn-success {
+            background: var(--accent-green);
+            color: white;
+        }
+
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+        }
+
+        /* Children Table */
+        .children-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .children-table th,
+        .children-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .children-table th {
+            font-weight: 700;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            color: var(--text-medium);
+            background: var(--bg-cream);
+        }
+
+        .children-table tbody tr:hover {
+            background: var(--bg-cream);
+        }
+
+        .child-name {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: white;
+            font-size: 0.9rem;
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .status-badge.pending {
+            background: var(--border);
+            color: var(--text-medium);
+        }
+
+        .status-badge.ready {
+            background: #FEF3C7;
+            color: #B45309;
+        }
+
+        .status-badge.analysed {
+            background: #D1FAE5;
+            color: #065F46;
+        }
+
+        .score {
+            font-weight: 800;
+            font-size: 1.1rem;
+        }
+
+        .score.low { color: var(--primary); }
+        .score.medium { color: var(--accent-yellow); }
+        .score.high { color: var(--accent-green); }
+
+        .check-icon {
+            color: var(--accent-green);
+        }
+
+        .missing-icon {
+            color: var(--text-light);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-light);
+        }
+
+        .empty-state .icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal h2 {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid var(--border);
+            border-radius: var(--radius-md);
+            font-family: inherit;
+            font-size: 1rem;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 1.5rem;
+        }
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--text-medium);
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">✏️ Early Writing Scanner</div>
+        <div>
+            <span style="color: var(--text-medium);">Reception Class 2024</span>
+        </div>
+    </div>
+
+    <div class="container">
+        <h1 class="page-title">👋 Teacher Dashboard</h1>
+
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="totalChildren">0</div>
+                <div class="stat-label">Children</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="readyCount">0</div>
+                <div class="stat-label">Ready for Analysis</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="analysedCount">0</div>
+                <div class="stat-label">Analysed</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="avgScore">-</div>
+                <div class="stat-label">Average Score</div>
+            </div>
+        </div>
+
+        <!-- Children Panel -->
+        <div class="panel">
+            <div class="panel-header">
+                <div class="panel-title">👧 Children</div>
+                <div style="display: flex; gap: 0.75rem;">
+                    <button class="btn btn-secondary btn-sm" onclick="openAddChild()">+ Add Child</button>
+                    <button class="btn btn-success btn-sm" onclick="analyseClass()" id="analyseBtn" disabled>
+                        🔍 Analyse Class
+                    </button>
+                </div>
+            </div>
+            <div class="panel-body" style="padding: 0;">
+                <table class="children-table">
+                    <thead>
+                        <tr>
+                            <th>Child</th>
+                            <th>Age</th>
+                            <th>Photo</th>
+                            <th>Observations</th>
+                            <th>Status</th>
+                            <th>Score</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="childrenTableBody">
+                        <tr>
+                            <td colspan="7">
+                                <div class="empty-state">
+                                    <div class="icon">👧</div>
+                                    <p>No children added yet. Click "Add Child" to get started.</p>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Child Modal -->
+    <div class="modal-overlay" id="addChildModal">
+        <div class="modal">
+            <h2>➕ Add Child</h2>
+            <form id="addChildForm">
+                <div class="form-group">
+                    <label for="childName">First Name</label>
+                    <input type="text" id="childName" required placeholder="e.g., Alice">
+                </div>
+                <div class="form-group">
+                    <label for="childDob">Date of Birth</label>
+                    <input type="date" id="childDob" required>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-ghost" onclick="closeAddChild()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Child</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Demo data - in production this comes from the API
+        let children = [];
+        const colors = ['#E85D4C', '#4A90A4', '#9B7ED9', '#6BBF59', '#F5C842'];
+
+        // Load children on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            loadChildren();
+        });
+
+        function loadChildren() {
+            // In production: fetch('/nursery/classes/CLASS_ID/children')
+            // For demo, we'll use localStorage
+            const saved = localStorage.getItem('nursery_children');
+            if (saved) {
+                children = JSON.parse(saved);
+            }
+            renderChildren();
+            updateStats();
+        }
+
+        function saveChildren() {
+            localStorage.setItem('nursery_children', JSON.stringify(children));
+        }
+
+        function renderChildren() {
+            const tbody = document.getElementById('childrenTableBody');
+
+            if (children.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7">
+                            <div class="empty-state">
+                                <div class="icon">👧</div>
+                                <p>No children added yet. Click "Add Child" to get started.</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = children.map((child, index) => {
+                const color = colors[index % colors.length];
+                const hasPhoto = child.hasPhoto;
+                const hasObs = child.hasObservations;
+                const isReady = hasPhoto && hasObs;
+                const status = child.status || 'pending';
+                const score = child.score;
+
+                return `
+                    <tr>
+                        <td>
+                            <div class="child-name">
+                                <div class="avatar" style="background: ${color}">
+                                    ${child.name.charAt(0)}
+                                </div>
+                                <span>${child.name}</span>
+                            </div>
+                        </td>
+                        <td>${child.age}</td>
+                        <td>
+                            ${hasPhoto 
+                                ? '<span class="check-icon">✓</span>' 
+                                : '<span class="missing-icon">○</span>'}
+                        </td>
+                        <td>
+                            ${hasObs 
+                                ? '<span class="check-icon">✓</span>' 
+                                : '<span class="missing-icon">○</span>'}
+                        </td>
+                        <td>
+                            <span class="status-badge ${status}">
+                                ${status === 'analysed' ? 'Analysed' : (isReady ? 'Ready' : 'Pending')}
+                            </span>
+                        </td>
+                        <td>
+                            ${score 
+                                ? `<span class="score ${score <= 2 ? 'low' : (score <= 3 ? 'medium' : 'high')}">${score}/5</span>` 
+                                : '-'}
+                        </td>
+                        <td>
+                            <button class="btn btn-sm btn-secondary" onclick="openChild(${index})">
+                                ${hasPhoto ? 'Edit' : 'Upload'}
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function updateStats() {
+            const total = children.length;
+            const ready = children.filter(c => c.hasPhoto && c.hasObservations && c.status !== 'analysed').length;
+            const analysed = children.filter(c => c.status === 'analysed').length;
+            
+            let avgScore = '-';
+            const scores = children.filter(c => c.score).map(c => c.score);
+            if (scores.length > 0) {
+                avgScore = (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(1);
+            }
+
+            document.getElementById('totalChildren').textContent = total;
+            document.getElementById('readyCount').textContent = ready;
+            document.getElementById('analysedCount').textContent = analysed;
+            document.getElementById('avgScore').textContent = avgScore;
+
+            document.getElementById('analyseBtn').disabled = ready === 0;
+        }
+
+        // Add Child Modal
+        function openAddChild() {
+            document.getElementById('addChildModal').classList.add('active');
+        }
+
+        function closeAddChild() {
+            document.getElementById('addChildModal').classList.remove('active');
+            document.getElementById('addChildForm').reset();
+        }
+
+        document.getElementById('addChildForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const name = document.getElementById('childName').value;
+            const dob = document.getElementById('childDob').value;
+            
+            // Calculate age
+            const birthDate = new Date(dob);
+            const today = new Date();
+            let years = today.getFullYear() - birthDate.getFullYear();
+            let months = today.getMonth() - birthDate.getMonth();
+            if (months < 0) {
+                years--;
+                months += 12;
+            }
+            
+            children.push({
+                id: Date.now(),
+                name: name,
+                dob: dob,
+                age: `${years}y ${months}m`,
+                hasPhoto: false,
+                hasObservations: false,
+                status: 'pending',
+                score: null
+            });
+            
+            saveChildren();
+            renderChildren();
+            updateStats();
+            closeAddChild();
+        });
+
+        function openChild(index) {
+            // In a full implementation, this would open the observation/upload page
+            alert(`Opening ${children[index].name}'s assessment.\n\nIn the full app, this would open the observation and upload page.`);
+            
+            // For demo, simulate adding photo and observations
+            if (!children[index].hasPhoto) {
+                if (confirm('Simulate uploading a photo?')) {
+                    children[index].hasPhoto = true;
+                }
+            }
+            
+            if (!children[index].hasObservations) {
+                if (confirm('Simulate adding observations?')) {
+                    children[index].hasObservations = true;
+                }
+            }
+            
+            saveChildren();
+            renderChildren();
+            updateStats();
+        }
+
+        function analyseClass() {
+            const ready = children.filter(c => c.hasPhoto && c.hasObservations && c.status !== 'analysed');
+            
+            if (ready.length === 0) {
+                alert('No children ready for analysis.');
+                return;
+            }
+            
+            if (!confirm(`Analyse ${ready.length} children?`)) {
+                return;
+            }
+            
+            // Simulate analysis
+            alert('Analysing... (In production, this calls the AI API)');
+            
+            ready.forEach(child => {
+                child.status = 'analysed';
+                child.score = Math.floor(Math.random() * 4) + 1; // Random 1-5 for demo
+            });
+            
+            saveChildren();
+            renderChildren();
+            updateStats();
+            
+            alert('Analysis complete! Check the scores column.');
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('addChildModal').addEventListener('click', (e) => {
+            if (e.target.classList.contains('modal-overlay')) {
+                closeAddChild();
+            }
+        });
+    </script>
+</body>
+</html>
